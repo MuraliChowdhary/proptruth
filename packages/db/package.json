@@ -1,0 +1,19 @@
+{
+  "name": "@proptruth/db",
+  "version": "0.0.1",
+  "main": "./index.ts",
+  "scripts": {
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "dotenv": "^17.4.1",
+    "prisma": "^7.7.0"
+  },
+  "exports": {
+      ".": "./index.ts"
+    }
+}

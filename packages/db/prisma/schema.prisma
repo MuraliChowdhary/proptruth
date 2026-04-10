@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  name      String
+  email     String   @unique
+  role      Role     @default(TENANT)
+  createdAt DateTime @default(now())
+
+  reports    Report[]
+  properties Property[]
+}
+
+enum Role {
+  TENANT
+  OWNER
+}
+
+model Property {
+  id            String    @id @default(cuid())
+  googlePlaceId String    @unique
+  address       String
+  city          String
+  state         String
+  pincode       String
+  propScore     Float?
+  reportCount   Int       @default(0)
+  lastReportAt  DateTime?
+  ownerId       String?
+  owner         User?     @relation(fields: [ownerId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  reports Report[]
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  tenantId    String
+  tenant      User     @relation(fields: [tenantId], references: [id])
+
+  moveInDate   DateTime
+  moveOutDate  DateTime
+  agreementUrl String
+  tenantNotes  String?
+  photoUrls    String[]
+
+  aiStatus       AIStatus     @default(PENDING)
+  aiFindings     Json?
+  aiConfidence   Float?
+  aiMismatchFlag Boolean      @default(false)
+
+  ipfsCid      String?
+  txHash       String?
+  anchorStatus AnchorStatus @default(PENDING)
+
+  submittedAt DateTime  @default(now())
+  publishAt   DateTime?
+  publishedAt DateTime?
+
+  ownerResponse OwnerResponse?
+}
+
+enum AIStatus {
+  PENDING
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+enum AnchorStatus {
+  PENDING
+  ANCHORED
+  FAILED
+}
+
+model OwnerResponse {
+  id          String  @id @default(cuid())
+  reportId    String  @unique
+  report      Report  @relation(fields: [reportId], references: [id])
+  notes       String
+  evidenceUrl String?
+  createdAt   DateTime @default(now())
+}

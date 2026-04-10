@@ -1,0 +1,9 @@
+{
+  "name": "@proptruth/contracts",
+  "version": "0.0.1",
+  "scripts": {
+    "compile": "forge build",
+    "test":    "forge test -vv",
+    "deploy":  "forge script script/Deploy.s.sol --rpc-url amoy --broadcast"
+  }
+}

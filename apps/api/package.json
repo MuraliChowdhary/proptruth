@@ -1,0 +1,29 @@
+{
+  "name": "@proptruth/api",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev":   "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist"
+  },
+  "dependencies": {
+    "@clerk/backend": "latest",
+    "@pinata/sdk": "latest",
+    "@prisma/client": "latest",
+    "@proptruth/db": "workspace:*",
+    "@proptruth/shared": "workspace:*",
+    "bullmq": "latest",
+    "cloudinary": "latest",
+    "dotenv": "latest",
+    "ethers": "latest",
+    "hono": "latest",
+    "ioredis": "latest",
+    "openai": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "typescript": "latest"
+  }
+}
