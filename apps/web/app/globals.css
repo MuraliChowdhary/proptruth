@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@layer base {
+  :root {
+    --background:       #FAFAF7;
+    --surface:          #F4F3EE;
+    --border:           #E8E6DF;
+    --text-primary:     #1C1C1A;
+    --text-secondary:   #6B6860;
+    --text-muted:       #9C9A93;
+    --accent:           #C9A84C;
+    --accent-hover:     #B8962E;
+    --accent-subtle:    #F5EDD6;
+    --success:          #2D6A4F;
+    --warning:          #B5580A;
+    --danger:           #8B1A1A;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color:            var(--text-primary);
+    font-family:      'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+  }
+
+  code, pre, .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-[#F4F3EE] border border-[#E8E6DF] rounded-xl p-6;
+  }
+
+  .btn-primary {
+    @apply bg-[#C9A84C] hover:bg-[#B8962E] text-white font-medium
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply border border-[#1C1C1A] text-[#1C1C1A] font-medium
+           px-6 py-3 rounded-xl transition-all duration-200
+           hover:bg-[#1C1C1A] hover:text-white;
+  }
+
+  .input {
+    @apply bg-[#F4F3EE] border border-[#E8E6DF] rounded-xl px-4 py-3
+           text-[#1C1C1A] placeholder:text-[#9C9A93]
+           focus:outline-none focus:ring-2 focus:ring-[#C9A84C]
+           focus:border-transparent transition-all duration-200 w-full;
+  }
+
+  .section {
+    @apply max-w-6xl mx-auto px-6 py-20;
+  }
+}

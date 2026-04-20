@@ -1,25 +1,19 @@
-import { openai } from "../lib/openai"
+// aiService.ts
+
 import type { AIAnalysisResult } from "@proptruth/shared"
 
-export class AIService {
+const OLLAMA_URL = "http://localhost:11434/api/generate"
 
+export class AIService {
   async analyzePhotos(
-    photoUrls:   string[],
+    photoUrls: string[],
     tenantNotes: string | null
   ): Promise<AIAnalysisResult> {
 
-    const imageContent = photoUrls.map(url => ({
-      type:      "image_url" as const,
-      image_url: { url, detail: "high" as const },
-    }))
+    try {
+      const prompt = `
+You are a property condition inspector. Analyze the images and return ONLY valid JSON in this format:
 
-    const response = await openai.chat.completions.create({
-      model:      "gpt-4o",
-      max_tokens: 1000,
-      messages: [
-        {
-          role:    "system",
-          content: `You are a property condition inspector. Analyze the photos and return a JSON object with this exact structure:
 {
   "findings": [
     {
@@ -34,25 +28,66 @@ export class AIService {
   "mismatchFlag": boolean,
   "rawResponse": "string"
 }
-Only return valid JSON. No markdown. No explanation.`,
-        },
-        {
-          role: "user",
-          content: [
-            ...imageContent,
-            {
-              type: "text",
-              text: `Tenant notes: ${tenantNotes ?? "None provided"}. 
-Analyze these property photos for mold, water damage, structural cracks, electrical hazards, and pest evidence. 
-If tenant notes claim issues not visible in photos, set mismatchFlag to true.`,
-            },
-          ],
-        },
-      ],
-    })
 
-    const raw  = response.choices[0]?.message.content ?? "{}"
-    const data = JSON.parse(raw) as AIAnalysisResult
-    return data
+Rules:
+- Detect: mold, water damage, cracks, electrical hazards, pests
+- If tenant notes mention issues NOT visible → mismatchFlag = true
+- No explanation, only JSON
+
+Tenant notes: ${tenantNotes ?? "None provided"}
+`
+
+      // NOTE: Ollama expects base64 images
+      const imagesBase64 = await Promise.all(
+        photoUrls.map(async (url) => {
+          const res = await fetch(url)
+          const buffer = await res.arrayBuffer()
+          return Buffer.from(buffer).toString("base64")
+        })
+      )
+
+      const response = await fetch(OLLAMA_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llava",
+          prompt,
+          images: imagesBase64,
+          stream: false,
+        }),
+      })
+
+      const result = await response.json()
+
+      const raw = result.response || "{}"
+
+      // Clean JSON (llava sometimes adds text)
+      const jsonStart = raw.indexOf("{")
+      const jsonEnd = raw.lastIndexOf("}")
+
+      const cleanJson =
+        jsonStart !== -1 && jsonEnd !== -1
+          ? raw.slice(jsonStart, jsonEnd + 1)
+          : "{}"
+
+      const data = JSON.parse(cleanJson) as AIAnalysisResult
+
+      return {
+        ...data,
+        rawResponse: raw,
+      }
+
+    } catch (error) {
+      console.error("AI Analysis Error:", error)
+
+      return {
+        findings: [],
+        overallScore: 0,
+        mismatchFlag: false,
+        rawResponse: "Error processing AI response",
+      }
+    }
   }
 }
